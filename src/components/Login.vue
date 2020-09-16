@@ -10,14 +10,29 @@
         ></v-img>
       </div>
       <p class="tag-line">Job seeking made easier</p>
-     <v-form @submit.prevent="login">
-        <label>Email</label>
+     <v-form @submit.prevent= "login">
+        
         <br />
-        <input v-model= "email" type="email" required />
+        <v-text-field
+           v-model= "email"
+           :error-messages= "emailErrors"
+          label="E-mail"
+          required
+           @input= "$v.email.$touch()"
+          @blur= "$v.email.$touch()"
+    ></v-text-field>
         <br />
-        <label>Password</label>
+      
         <br />
-        <input v-model= "password" type="password" required />
+    <v-text-field
+      v-model= "password"
+      :error-messages= "passwordErrors"
+      label="Password"
+      type="password"
+      required
+        @input= "$v.password.$touch()"
+        @blur= "$v.password.$touch()"
+    ></v-text-field>
         <div class="check">
           <div class="checkbox">
             <input
@@ -31,7 +46,7 @@
           </div>
           <a href="#">Forgot your password?</a>
         </div>
-        <button type="submit">Sign In</button>
+         <button type="submit">Sign In</button>
       </v-form>
 
       <div class="social-container">
@@ -64,22 +79,50 @@
 </template>
 
 <script>
+  import { validationMixin } from 'vuelidate'
+  import { required, email } from 'vuelidate/lib/validators'
 var bcrypt = require('bcryptjs');
 export default {
+   mixins: [validationMixin],
   name: 'Login',
+  validations: {
+    email: {required, email },
+    password: {required}
+  },
   data(){
       return{
         email: '',
         password: '',
         checked: '',
       };
-  },methods:{
+  },
+  computed: {
+            emailErrors () {
+        const errors = []
+        if (!this.$v.email.$dirty) return errors
+        !this.$v.email.email && errors.push('Must be valid e-mail')
+        !this.$v.email.required && errors.push('E-mail is required')
+        return errors
+      },
+            passwordErrors () {
+        const errors = []
+        if (!this.$v.password.$dirty) return errors
+        !this.$v.password.required && errors.push('Password is required')
+        return errors
+      },
+  },
+  
+  
+  methods:{
    async login(){
+       this.$v.$touch();
     const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(this.password, salt);
-      this.$http.post('user/login',{
+
+      this.$http.post('http://localhost:3000/data',{
         email: this.email,
         password: hashedPassword,
+     
       })
       .then(response =>{
        console.log(response);
@@ -87,6 +130,7 @@ export default {
       .catch(error =>{
         console.log(error);
       });
+    
     }
   }
 };
