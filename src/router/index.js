@@ -21,9 +21,9 @@ const routes = [
     component: () => import('@/components/Registration.vue')
   },
   {
-    path: '/jobadd',
-    name: 'CreateJobAdd',
-    component: () => import('@/components/CreateJobAdd.vue')
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/Dashboard.vue')
   }
 ];
 
